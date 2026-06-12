@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Course Grade Calculator</title>
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #5f6b7a;
+      --line: #d8dee8;
+      --soft: #f6f8fb;
+      --panel: #ffffff;
+      --blue: #1d4ed8;
+      --green: #16803c;
+      --yellow: #b77900;
+      --orange: #c2410c;
+      --red: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef2f7;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    .grade-calculator {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+      line-height: 1.15;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .result-card,
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(31, 41, 55, 0.06);
+    }
+
+    .result-card {
+      padding: 16px;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .result-score {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .result-letter {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #ffffff;
+      font-weight: 700;
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .grade-a {
+      background: var(--blue);
+    }
+
+    .grade-b {
+      background: var(--green);
+    }
+
+    .grade-c {
+      background: var(--yellow);
+      color: #1f2937;
+    }
+
+    .grade-d {
+      background: var(--orange);
+    }
+
+    .grade-f {
+      background: var(--red);
+    }
+
+    .empty {
+      background: #6b7280;
+    }
+
+    .section {
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .entry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+    }
+
+    label {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 95px;
+      align-items: center;
+      gap: 10px;
+      color: #263243;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid #b9c2d0;
+      border-radius: 6px;
+      padding: 8px 9px;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      outline: 3px solid rgba(29, 78, 216, 0.18);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid #aab4c3;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      padding: 8px 14px;
+    }
+
+    button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .note {
+      background: var(--soft);
+      border-left: 4px solid #718096;
+      padding: 12px;
+      margin: 14px 0;
+      color: #374151;
+    }
+
+    .scale {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .scale span {
+      border-radius: 999px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 10px;
+    }
+
+    .scale .grade-c {
+      color: #1f2937;
+    }
+
+    @media (max-width: 820px) {
+      .grade-calculator {
+        padding: 16px;
+      }
+
+      .results,
+      .entry-grid {
+        grid-template-columns: 1fr;
+      }
+
+      label {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="grade-calculator">
+    <header>
+      <h1>Course Grade Calculator</h1>
+      <p>Enter each score as a percentage. Blank scores are ignored until you have a score to enter. Scores entered on this device are saved automatically in this browser.</p>
+      <div class="scale" aria-label="Letter grade scale">
+        <span class="grade-a">A: 92-100%</span>
+        <span class="grade-b">B: 84-&lt;92%</span>
+        <span class="grade-c">C: 75-&lt;84%</span>
+        <span class="grade-d">D: 67-&lt;75%</span>
+        <span class="grade-f">F: 0-&lt;67%</span>
+      </div>
+    </header>
+
+    <section class="results" aria-live="polite">
+      <div class="result-card">
+        <div class="result-label">Lecture Grade</div>
+        <div class="result-score" id="lectureScore">--</div>
+        <div class="result-letter empty" id="lectureLetter">No scores</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Lab Grade</div>
+        <div class="result-score" id="labScore">--</div>
+        <div class="result-letter empty" id="labLetter">No scores</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Combined Lecture/Lab Grade</div>
+        <div class="result-score" id="combinedScore">--</div>
+        <div class="result-letter empty" id="combinedLetter">No scores</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Final Course Grade Under Passing Policy</div>
+        <div class="result-score" id="policyScore">--</div>
+        <div class="result-letter empty" id="policyLetter">No scores</div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="primary" type="button" id="calculateButton">Calculate</button>
+      <button type="button" id="clearButton">Clear Scores</button>
+    </div>
+
+    <div class="note">
+      Scores in each category are averaged together first. The category average is then multiplied by that category's weight. Empty fields do not count against the grade.
+    </div>
+
+    <div class="note">
+      Passing policy: students must earn a C or better in both lecture and lab to pass the course. If the lecture grade or lab grade is below 75%, the final course grade shown under the policy is based on the lowest failing component instead of the combined average.
+    </div>
+
+    <section class="section">
+      <h2>Workbook Assignments</h2>
+      <p>15% of lecture grade and 7.5% of combined grade</p>
+      <div class="entry-grid" id="assignments"></div>
+    </section>
+
+    <section class="section">
+      <h2>Quizzes</h2>
+      <p>20% of lecture grade and 10% of combined grade</p>
+      <div class="entry-grid" id="quizzes"></div>
+    </section>
+
+    <section class="section">
+      <h2>Section Exams</h2>
+      <p>30% of lecture grade and 15% of combined grade</p>
+      <div class="entry-grid" id="sectionExams"></div>
+    </section>
+
+    <section class="section">
+      <h2>Final Exam</h2>
+      <p>35% of lecture grade and 17.5% of combined grade</p>
+      <div class="entry-grid" id="finalExam"></div>
+    </section>
+
+    <section class="section">
+      <h2>Practical Exams</h2>
+      <h3>Practicals 1 and 2</h3>
+      <p>15% of lab grade and 7.5% of combined grade</p>
+      <div class="entry-grid" id="practicalGroup1"></div>
+      <h3>Practicals 3 and 4</h3>
+      <p>30% of lab grade and 15% of combined grade</p>
+      <div class="entry-grid" id="practicalGroup2"></div>
+      <h3>Practicals 5-7</h3>
+      <p>55% of lab grade and 27.5% of combined grade</p>
+      <div class="entry-grid" id="practicalGroup3"></div>
+    </section>
+  </main>
+
+  <script>
+    const categories = [
+      {
+        id: "assignments",
+        items: [
+          "Terminology Workbook Assignment",
+          "Upper Ext. Workbook Assignment",
+          "Lower Ext. Workbook Assignment",
+          "Shoulder Workbook Assignment",
+          "Thoracic Visc. Workbook Assignment",
+          "Bony Thorax Workbook Assignment",
+          "Vertebral Column Workbook",
+          "Pelvis/Hip Workbook Assignment",
+          "Abdomen Workbook"
+        ],
+        lectureWeight: 15,
+        combinedWeight: 7.5
+      },
+      {
+        id: "quizzes",
+        items: [
+          "Terminology Quiz",
+          "Upper Ext. Quiz",
+          "Lower Ext. Quiz",
+          "Shoulder Quiz",
+          "Thoracic/Bony Thorax Quiz",
+          "Vertebral Column Quiz",
+          "Pelvis/Hip Quiz",
+          "Abdomen Quiz"
+        ],
+        lectureWeight: 20,
+        combinedWeight: 10
+      },
+      {
+        id: "sectionExams",
+        items: ["Section Exam 1", "Section Exam 2"],
+        lectureWeight: 30,
+        combinedWeight: 15
+      },
+      {
+        id: "finalExam",
+        items: ["Final Exam"],
+        lectureWeight: 35,
+        combinedWeight: 17.5
+      },
+      {
+        id: "practicalGroup1",
+        items: ["Practical 1, Exam 1", "Practical 1, Exam 2"],
+        labWeight: 15,
+        combinedWeight: 7.5
+      },
+      {
+        id: "practicalGroup2",
+        items: ["Practical 2, Exam 1", "Practical 2, Exam 2"],
+        labWeight: 30,
+        combinedWeight: 15
+      },
+      {
+        id: "practicalGroup3",
+        items: ["Practical 3, Exam 1", "Practical 3, Exam 2", "Practical 3, Exam 3"],
+        labWeight: 55,
+        combinedWeight: 27.5
+      }
+    ];
+
+    function makeSafeId(text, index) {
+      return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + index;
+    }
+
+    function buildInputs() {
+      categories.forEach(function(category) {
+        const container = document.getElementById(category.id);
+        category.items.forEach(function(item, index) {
+          const inputId = makeSafeId(category.id + "-" + item, index);
+          const label = document.createElement("label");
+          label.setAttribute("for", inputId);
+          label.textContent = item;
+
+          const input = document.createElement("input");
+          input.id = inputId;
+          input.type = "number";
+          input.inputMode = "decimal";
+          input.min = "0";
+          input.max = "100";
+          input.step = "0.01";
+          input.placeholder = "%";
+          input.dataset.category = category.id;
+          input.setAttribute("aria-label", item + " percentage score");
+
+          label.appendChild(input);
+          container.appendChild(label);
+        });
+      });
+    }
+
+    function categoryAverage(category) {
+      const inputs = Array.from(document.querySelectorAll('[data-category="' + category.id + '"]'));
+      const scores = inputs
+        .map(function(input) {
+          return input.value.trim() === "" ? null : Number(input.value);
+        })
+        .filter(function(score) {
+          return score !== null && Number.isFinite(score);
+        })
+        .map(function(score) {
+          return Math.min(100, Math.max(0, score));
+        });
+
+      if (scores.length === 0) {
+        return null;
+      }
+
+      return scores.reduce(function(total, score) {
+        return total + score;
+      }, 0) / scores.length;
+    }
+
+    function weightedGrade(weightKey) {
+      let earned = 0;
+      let possible = 0;
+
+      categories.forEach(function(category) {
+        if (!category[weightKey]) {
+          return;
+        }
+
+        const average = categoryAverage(category);
+        if (average === null) {
+          return;
+        }
+
+        earned += average * category[weightKey];
+        possible += category[weightKey];
+      });
+
+      if (possible === 0) {
+        return null;
+      }
+
+      return earned / possible;
+    }
+
+    function letterGrade(score) {
+      if (score === null) {
+        return { letter: "No scores", className: "empty" };
+      }
+      if (score >= 92) {
+        return { letter: "A", className: "grade-a" };
+      }
+      if (score >= 84) {
+        return { letter: "B", className: "grade-b" };
+      }
+      if (score >= 75) {
+        return { letter: "C", className: "grade-c" };
+      }
+      if (score >= 67) {
+        return { letter: "D", className: "grade-d" };
+      }
+      return { letter: "F", className: "grade-f" };
+    }
+
+    function updateResult(scoreId, letterId, score) {
+      const scoreElement = document.getElementById(scoreId);
+      const letterElement = document.getElementById(letterId);
+      const grade = letterGrade(score);
+
+      scoreElement.textContent = score === null ? "--" : score.toFixed(2) + "%";
+      letterElement.textContent = grade.letter;
+      letterElement.className = "result-letter " + grade.className;
+    }
+
+    function policyGrade(lectureScore, labScore, combinedScore) {
+      const failingScores = [lectureScore, labScore].filter(function(score) {
+        return score !== null && score < 75;
+      });
+
+      if (failingScores.length > 0) {
+        return Math.min.apply(null, failingScores);
+      }
+
+      return combinedScore;
+    }
+
+    function calculateGrades() {
+      const lectureScore = weightedGrade("lectureWeight");
+      const labScore = weightedGrade("labWeight");
+      const combinedScore = weightedGrade("combinedWeight");
+
+      updateResult("lectureScore", "lectureLetter", lectureScore);
+      updateResult("labScore", "labLetter", labScore);
+      updateResult("combinedScore", "combinedLetter", combinedScore);
+      updateResult("policyScore", "policyLetter", policyGrade(lectureScore, labScore, combinedScore));
+    }
+
+    const storageKey = "course-grade-calculator-scores";
+
+    function saveScores() {
+      const scores = {};
+      document.querySelectorAll("input").forEach(function(input) {
+        if (input.value.trim() !== "") {
+          scores[input.id] = input.value;
+        }
+      });
+      localStorage.setItem(storageKey, JSON.stringify(scores));
+    }
+
+    function loadScores() {
+      const savedScores = localStorage.getItem(storageKey);
+      if (!savedScores) {
+        return;
+      }
+
+      try {
+        const scores = JSON.parse(savedScores);
+        Object.keys(scores).forEach(function(inputId) {
+          const input = document.getElementById(inputId);
+          if (input) {
+            input.value = scores[inputId];
+          }
+        });
+      } catch (error) {
+        localStorage.removeItem(storageKey);
+      }
+    }
+
+    function clearScores() {
+      document.querySelectorAll("input").forEach(function(input) {
+        input.value = "";
+      });
+      localStorage.removeItem(storageKey);
+      calculateGrades();
+    }
+
+    buildInputs();
+    loadScores();
+    calculateGrades();
+
+    document.getElementById("calculateButton").addEventListener("click", calculateGrades);
+    document.getElementById("clearButton").addEventListener("click", clearScores);
+    document.querySelectorAll("input").forEach(function(input) {
+      input.addEventListener("input", function() {
+        saveScores();
+        calculateGrades();
+      });
+    });
+  </script>
+</body>
+</html>
